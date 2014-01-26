@@ -1,0 +1,204 @@
+html, body
+{
+    width: 100%;
+    height: 100%;
+    background-color: #e9e4e1;
+}
+
+body
+{
+    position: relative;
+}
+
+a
+{
+    color: #f1f1f1 !important;
+}
+
+a:hover
+{
+    color: #dedede !important;
+    text-decoration: none !important;
+    cursor: pointer;
+}
+
+*:not(.glyphicon)
+{
+    font-family: 'Roboto Condensed', 'Arial' !important;
+}
+
+.navbar-default
+{
+    padding-left: 20px;
+    padding-right: 20px;
+
+    border-radius: 0px;
+    -moz-border-radius: 0px;
+    -webkit-border-radius: 0px;
+
+    margin-bottom: 0px;
+
+    background-color: #403b38;
+    border: none;
+    border-bottom: 1px solid #f1f0ee;
+
+    -moz-box-shadow:    1px 1px 3px #d4cdc8;
+    -webkit-box-shadow: 1px 1px 3px #d4cdc8;
+    box-shadow:         1px 1px 3px #d4cdc8;
+}
+
+.navbar-default .navbar-brand
+{
+    font-size: 24px;
+    padding-left: 0px;
+}
+
+.navbar-default .navbar-right
+{
+    font-size: 18px;
+    margin-right: 0px !important;
+}
+
+.navbar-default .navbar-right a
+{
+    width: auto;
+    display: inline-block;
+    padding-right: 15px;
+}
+
+.container
+{
+    width: 100%;
+    padding: 25px;
+}
+
+div.gridster
+{
+    list-style: none;
+    width: auto;
+    padding: 0px;
+}
+
+.box
+{
+    background-color: #f1f0ee;
+    border: 4px solid #d1cbc6;
+
+    height: 100%;
+    padding: 12px;
+
+    color: #999999;
+}
+
+.box .header
+{
+    position: relative;
+}
+
+.box .header h2
+{
+    margin: 0px;
+    font-size: 12px;
+    line-height: 12px;
+    text-transform: uppercase;
+
+    padding-bottom: 10px;
+    margin-bottom: 10px;
+}
+
+.box .header h3
+{
+    margin: 0px;
+    margin-bottom: 20px;
+    color: #403b38;
+}
+
+.box .header .glyphicon-cog
+{
+    position: absolute;
+    top: 0px;
+    right: 0px;
+    font-size: 15px;
+
+    color: #bdbab8 !important;
+}
+
+.box .row
+{
+    margin: 0px;
+}
+
+.box .row [class^='col']
+{
+    padding: 0px;
+}
+
+.block
+{
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    width: 100%;
+    height: 100%;
+
+    background-color: #ffffff;
+    z-index: 999;
+
+    -moz-opacity: 0.8;
+    opacity: 0.8;
+    filter: alpha(opacity=80);
+}
+
+.settings
+{
+    width: 500px;
+    height: auto;
+    left: 50%;
+    margin-left: -250px;
+    top: 100px;
+    position: absolute;
+
+    z-index: 1000;
+
+    padding: 20px;
+}
+
+.settings p
+{
+    margin-bottom: 30px;
+}
+
+.settings button[type="submit"]
+{
+    margin-top: 10px;
+}
+
+.settings.box .form-group
+{
+
+}
+
+.settings.box .form-group label
+{
+    font-weight: normal;
+}
+
+.settings .widget
+{
+    background-color: #b3aea2;
+    border: 1px solid #979286;
+    padding: 15px;
+    color: #ffffff;
+}
+
+.settings .widget h4,
+.settings .widget p
+{
+    margin: 5px;
+}
+
+.settings .widget .glyphicon-plus
+{
+    margin: 20px;
+    font-size: 30px;
+}

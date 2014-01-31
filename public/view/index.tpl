@@ -44,18 +44,6 @@
             <div class="gridster"></div>
         </div>
 
-        <script type="text/html" id="widget-template">
-            <div class="box">
-                <div>
-                    <div class='header'>
-                        <h2 data-bind="text: settings.title"></h2>
-                        <a data-bind="click: showSettings" class='glyphicon glyphicon-cog'></a>
-                    </div>
-                </div>
-                <div data-bind="html: render()"></div>
-            </div>
-        </script>
-
 
         <script type="text/html" id="widget-add">
             <div class='header'>
@@ -89,6 +77,8 @@
                 </div>
 
                 <button type="submit" class="btn btn-primary" data-bind="click: saveSettings">Submit</button>
+
+                <button type="submit" class="btn btn-danger pull-right" data-bind="click: removeWidget">Remove</button>
             </div>
         </script>
 

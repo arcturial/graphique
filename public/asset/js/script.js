@@ -40,6 +40,25 @@ var TextField = Field.extend({
 });
 
 
+function Dashboard(name) {
+    var self = this;
+    self.name = ko.observable(name);
+    self.widgets = ko.observableArray([]);
+
+    self.get = function (id) {
+        var widgets = self.widgets();
+
+        for (var key in widgets) {
+            if (widgets[key].id == id) {
+                return widgets[key];
+            }
+        }
+
+        return false;
+    }
+}
+
+
 /**
  * The container is the application object. It contains
  * all application variables.
@@ -47,6 +66,12 @@ var TextField = Field.extend({
 function Application() {
     var self = this;
     self.type = [];
+    self.dashboards = ko.observableArray([]);
+    self.active = false;
+
+    self.addDashboard = function (dashboard) {
+        self.dashboards.push(dashboard);
+    }
 
     /**
      * Create a new dashboard struct that keeps track of dashboard
@@ -86,6 +111,9 @@ function Application() {
 
                 self.dashboard.widgets.push(widget);
 
+                // Trigger a draw update
+                $(self).trigger('update', [widget, false]);
+
                 // Kill the add box
                 Application.removeSettings();
 
@@ -111,7 +139,9 @@ function Application() {
 
                 if (typeof widget !== 'undefined') {
                     self.dashboard.widgets.push(widget);
-                    widget.load();
+
+                    // Trigger a draw update
+                    $(self).trigger('update', [widget, false]);
                 }
             }
         });
@@ -171,6 +201,22 @@ function Application() {
     self.addWidget = function () {
         Application.showSettings('widget-add', this);
     }
+
+    /**
+     * Remove an existing widget.
+     */
+    self.removeWidget = function (item) {
+
+        for (var key in self.dashboard.widgets()) {
+            var widget = self.dashboard.widgets()[key];
+
+            if (widget.id == item.id) {
+                item.removeSettings();
+                var remove = self.dashboard.widgets.splice(key, 1);
+                $(app).trigger('update', [false, remove.pop()]);
+            }
+        }
+    }
 }
 
 /**
@@ -207,6 +253,7 @@ var app = new Application();
 $(document).ready(function() {
 
     // Gridster setup (dynamic width)
+    var widgetBuffer = [];
     var width = $(".gridster").width() / 12;
     var grid = $(".gridster").gridster({
         widget_margins: [10, 10],
@@ -218,15 +265,22 @@ $(document).ready(function() {
     // Add a subscriber to add widgets to the gridster
     // grid. This is an important hook as it's responsible
     // for the display of widgets.
-    app.dashboard.widgets.subscribe(function (value) {
+    $(app).on('update', function (event, add, remove) {
 
-        for (var key in value) {
-            var item = value[key];
-
-            if ($('#widget-' + item.id).length == 0) {
-                grid.add_widget(item.template(), item.constructor.config.width, item.constructor.config.height);
-                ko.applyBindings(app, $("#widget-" + item.id).get(0));
+        // Add the grid to gridster. Then run the
+        // initial load method and call the "added" callback.
+        if (add) {
+            if ($('#widget-' + add.id).length == 0) {
+                grid.add_widget(add.render(), add.constructor.config.width, add.constructor.config.height);
+                ko.applyBindings(app, $("#widget-" + add.id).get(0));
+                add.apply();
+                add.load();
             }
+        }
+
+        // Remove the grid from gridster
+        if (remove) {
+            grid.remove_widget($("#widget-" + remove.id));
         }
     });
 

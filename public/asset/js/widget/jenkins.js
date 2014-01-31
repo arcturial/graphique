@@ -15,7 +15,7 @@ var Jenkins = Widget.extend({
          * status changes.
          */
         this.data.status.subscribe(function (value) {
-            $("#widget-" + self.id + " .box").attr("class", "box jenkins " + value);
+            self.className("box jenkins " + value);
         });
 
         this.fields.add(new TextField(
@@ -74,7 +74,7 @@ app.styles.add('.jenkins.status { font-size: 46px; }');
 app.styles.add('.jenkins.status.green { color: #7cac40; } .status.green:before {content:"\\e013"}');
 app.styles.add('.jenkins.status.grey:before {content:"\\2a"}');
 app.styles.add('.jenkins.status.red { color: #ad3e37; } .status.red:before {content:"\\e014"}');
-app.styles.add('.box.jenkins.red { background-color: #f4e5e5; border-color: #b87b7b; color: #b87b7b; }');
+app.styles.add('.box.jenkins.red { background-color: #f4e5e5; border-color: #b87b7b; color: #8A4A4A; }');
 app.styles.add('.box.jenkins.green { background-color: #edf6e5; border-color: #87aa67; color: #87aa67; }');
 
 app.register(Jenkins);

@@ -1,121 +1,219 @@
-var Widget = Class.extend({
-    init: function(title, settings) {
+var Schedule = Class.extend({
+    init: function (callback) {
+        var self = this;
+        self.callback = callback;
+        self.scheduled = false;
+    },
+    abolish: function () {
+        this.scheduled = false;
+        $(Schedule).trigger('abolish');
+    },
+    schedule: function (time) {
+        var self = this;
+
+        // Check if we already have something scheduled. If
+        // we do and we want to execute a request now...we need to
+        // abolist the current schedule.
+        if (self.scheduled) {
+            if (!time) {
+                self.abolish();
+            } else {
+                return true;
+            }
+        }
+
+        // Get the latest interval or run it now.
+        //var time = !now ? self.context.struct.getField('interval').value() : 0;
+
+        // Schedule a new request
+        self.scheduled = setTimeout(function() {
+            self.abolish();
+            self.callback.call(self);
+        }, time);
+
+        $(Schedule).trigger('schedule', [time]);
+    }
+});
+
+var Tab = Class.extend({
+    init: function (name) {
+        this.name = name;
+        this.fields = [];
+    },
+    get: function (field) {
+        for (var key in this.fields) {
+            if (toDom(this.fields[key].name) == field) {
+                return this.fields[key];
+            }
+        }
+
+        return false;
+    }
+});
+
+var Settings = Class.extend({
+    init: function (settings) {
+        this.tabs = ko.observableArray([]);
+        this.tabs.subscribe(function (value) {
+            // Loop through all fields in new tab setup
+            for (var key in value) {
+                for (var index in value[key].fields) {
+                    var field = value[key].fields[index];
+                    var label = field.name;
+                    // Set the value
+                    if (typeof settings[label] !== 'undefined') {
+                        field.value(settings[label]);
+                    }
+                }
+            }
+        });
+    },
+    all: function () {
+        var result = [];
+        for (var key in this.tabs()) {
+            for (var i = 0; i < this.tabs()[key].fields.length; i++) {
+                result.push(this.tabs()[key].fields[i]);
+            }
+        }
+        return result;
+    },
+    get: function (tab) {
+        for (var key in this.tabs()) {
+            if (toDom(this.tabs()[key].name) == tab) {
+                return this.tabs()[key];
+            }
+        }
+        return false;
+    },
+    getField: function (field) {
+        for (var key in this.tabs()) {
+            if (this.tabs()[key].get(field)) {
+                return this.tabs()[key].get(field);
+            }
+        }
+
+        return false;
+    }
+});
+
+var Widget = SettingAware.extend({
+    xhr: false,
+    init: function(settings) {
         var self = this;
 
         // Use the auto increment to keep track of id's
         self.id = ++unique;
 
+        // Keep track of tabbed settings
+        self.struct = new Settings(settings);
+
+        // Set up the default settings for all widgets
+        var information = new Tab('Widget');
+
+        // Push the title into the information settings
+        information.fields.push(new TextField('Title','Widget Title'));
+        information.fields.push(new TextField('Interval', 30000));
+        self.struct.tabs.push(information);
+
         // Keep a class name incase we need to add custom styles
         // to the box
-        self.className = ko.observable('box');
+        self.classes = ko.observableArray(['box']);
+        self.className = ko.computed(function() {
+            return self.classes().join(" ");
+        });
 
-        // Create settings from the defaults at first
-        self.settings = $.extend({}, self.defaults);
 
-        // If settings were passes on init
-        if (typeof settings !== 'undefined') {
-            $.extend(self.settings, settings);
-        }
+        // Set up a complex queue request object.
+        var request = new Request(function (req) {
+            self.load.call(self, function () {
+                self.schedule.schedule(self.struct.getField('interval').value());
+                request.release();
+            });
+        });
 
-        // Deal with title
-        self.settings.title = ko.observable(title);
-
-        self.scheduled = false;
-
-        // Add the title field
-        self.fields = {
-            all: ko.observableArray([]),
-            add: function (field) {
-                this.all.push(field);
+        // Set up a scheduled task
+        self.schedule = new Schedule(function () {
+            if (!RequestQueue.has(request)) {
+                RequestQueue.push(request);
             }
-        };
-
-        self.fields.add(new TextField(
-            'Title',
-            function() { return self.settings.title(); },
-            function(value) { self.settings.title(value); }
-        ));
-
-        self.fields.add(new TextField(
-            'Interval',
-            function() { return self.settings.interval; },
-            function(value) { self.settings.interval = value; }
-        ));
+        });
     },
-    schedule: function() {
-
+    remoteRequest: function (host, success) {
         var self = this;
 
-        if (typeof self.settings.interval !== 'undefined')
-        {
-            self.scheduled = setTimeout(function() {
-                self.load();
-            }, this.settings.interval);
-        }
-    },
-    defaults: {
-        'interval': 30000
-    },
-    load: function() {
-        if (self.scheduled) {
-            clearInterval(self.scheduled);
+        // Mark the widget as loading
+        if (self.classes.indexOf('load') == -1) {
+            self.classes.push('load');
         }
 
+        // Kill any existing requests
+        if (self.xhr) {
+            return true;
+        }
+
+        self.xhr = $.post(Remote.forwardUrl, { host: '', path: host }, success)
+            .always(function() {
+                // Unmark the widget as it's not loading
+                if (self.classes.indexOf('load') != -1) {
+                    self.classes.splice(self.classes.indexOf('load'), 1);
+                }
+
+                self.xhr = false;
+            });
+    },
+    load: function(done) {
         return this;
     },
     content: function() {
         return '';
     },
     render: function() {
-        return '<div id="widget-' + this.id + '"'
-            + '  data-bind="with: dashboard.get(' + this.id + ')">'
-            + '  <div data-bind="attr: { class: className }">'
-            + '    <div class="header">'
-            + '      <h2 data-bind="text: settings.title"></h2>'
-            + '      <a data-bind="click: showSettings" class="glyphicon glyphicon-cog"></a>'
-            + '    </div>'
-            + '    <div class="render">' + this.content() + '</div>'
-            + '  </div>'
-            + '</div>';
+        return '<div class="render">' + this.content() + '</div>';
     },
     apply: function() {
+        var self = this;
+
+        // Apply render bindings and load
+        ko.applyBindings(self, $("#widget-" + self.id + " .render").get(0));
+        $("#widget-" + self.id).data(self);
+
+        // Schedule a run for NOW
+        this.schedule.schedule(false);
+
         return true;
     },
-    showSettings: function() {
-        Application.showSettings('widget-settings', this);
-    },
-    saveSettings: function() {
-
-        var fields = this.fields.all();
-
-        for (var key in fields) {
-            var field = fields[key];
-            field.save();
-        }
-
-        this.removeSettings();
-        this.load();
-    },
-    removeSettings: function() {
-        Application.removeSettings();
-    },
-    removeWidget: function() {
-        app.removeWidget(this);
-    },
-    bindField: function(dom, item) {
-        ko.applyBindings(item, $('#settings #' + toDom(item.name)).get(0));
+    remove: function() {
+        Application.removeWidget(this);
     },
     serialize: function () {
+        var fields = this.struct.all();
+        var temp = {};
 
-        var node = $("#widget-" + this.id);
-        var data = node.data();
+        // Build settings;
+        for (var key in fields) {
+            var field = fields[key];
+            temp[field.name] = field.value();
+        }
 
-        var temp = $.extend({}, this.settings);
-        temp.title = this.settings.title();
-        temp.col = data.col;
-        temp.row = data.row;
         temp.type = this.constructor.config.type;
 
+        console.log(temp);
         return temp;
     }
 });
+
+
+
+
+
+
+
+
+
+
+
+var Debug = {
+    log: function (message) {
+        console.log(message);
+    }
+}

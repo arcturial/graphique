@@ -1,69 +1,309 @@
 var Graphite = Widget.extend({
-    init: function (title) {
-        this._super(title);
+    init: function (title, settings) {
+        var self = this;
+        self._super(title, settings);
 
-        this.graph = null;
-        this.data = [
-            [{ x: -1893456000, y: 25868573 }, { x: -1577923200, y: 29662053 }, { x: -1262304000, y: 34427091 }, { x: -946771200, y: 35976777 }, { x: -631152000, y: 39477986 }, { x: -315619200, y: 44677819 }, { x: 0, y: 49040703 }, { x: 315532800, y: 49135283 }, { x: 631152000, y: 50809229 }, { x: 946684800, y: 53594378 }, { x: 1262304000, y: 55317240 }],
-            [{ x: -1893456000, y: 29888542 }, { x: -1577923200, y: 34019792 }, { x: -1262304000, y: 38594100 }, { x: -946771200, y: 40143332 }, { x: -631152000, y: 44460762 }, { x: -315619200, y: 51619139 }, { x: 0, y: 56571663 }, { x: 315532800, y: 58865670 }, { x: 631152000, y: 59668632 }, { x: 946684800, y: 64392776 }, { x: 1262304000, y: 66927001 }],
-        ];
+        // Set the class of the widget
+        self.classes.push('graphite');
+
+        // Add the Graphite URL field.
+        self.fields.add(
+            new TextField(
+                'Graphite URL',
+                function () { return self.settings.url; },
+                function (value) { self.settings.url = value; }
+            )
+        );
+
+        // Add refresh cycle
+        self.fields.add(
+            new RadioBox(
+                function () {
+                    return [
+                        { name: '1 Week', value: '-1weeks' },
+                        { name: '1 day', value: '-1days' },
+                        { name: '1 hour', value: '-1hours' }
+                    ]
+                },
+                'Timeframe',
+                function () { return self.settings.timeframe; },
+                function (value) { self.settings.timeframe = value; }
+            )
+        );
+
+        // Add a textarea for targets.
+        self.fields.add(
+            new TextArea(
+                'Targets',
+                function () { return self.settings.targets.join(","); },
+                function (value) { self.settings.targets = value.split(","); }
+            )
+        );
+
+        // Load up algorithms
+        self.fields.add(
+            new RadioBox(
+                function () {
+                    var options = Graphite.algorithms.getAsNameValue();
+                    options.unshift({ name: 'None', value: '-1' });
+                    return options;
+                },
+                'Algorithms',
+                function () { return self.settings.algorithm; },
+                function (value) { return self.settings.algorithm = value; }
+            )
+        );
     },
     defaults: {
-        'width': 6,
         'interval': 30000,
-        'height': 2
+        'targets': ['randomWalk("the.time.series")'],
+        'url': '',
+        'timeframe': '-1weeks',
+        'algorithm': '-1'
     },
     content: function () {
-        return ''
-            + '<style type="text/css">'
-            + '.graph-cont { position: relative; height: 262px; }'
-            + '.y-axis { position: absolute; left: 0px; top: 0px; width: 40px; height: 100%; }'
-            + '.x-axis { position: absolute; left: 0px; bottom: 0px; height: 100%; }'
-            + '.graph { position: absolute; left: 40px; top: 0px; height: 100%; }'
-            + '</style>'
-            + '<div class="graph-cont">'
-            + '<div id="y-axis-' + this.id + '" class="y-axis" style="fill:#000000;"></div>'
-            + '<div id="graph-' + this.id + '" class="graph" style="fill:#000000;color:#000000;"></div>'
-            + '</div>';
+        return '<div class="graphite-cont"></div>'
+            + '<div class="graphite-legend"></div>';
     },
-    load: function () {
+    load: function (schedule) {
+        var self = this._super();
 
+        if (self.settings.url) {
 
+            // Calculate the targets
+            var targets = "";
+            for (var key in self.settings.targets) {
+                targets += "&target=" + self.settings.targets[key];
+            }
 
+            // Request
+            self.remoteRequest(
+                self.settings.url + "/render/?format=json&from=" + self.settings.timeframe + "&" + targets,
+                function (data) {
+                    data = JSON.parse(data);
+                    var series = [];
+
+                    for (var key in data) {
+                        var target = data[key];
+                        var points = [];
+
+                        for (var index in target.datapoints) {
+                            var value = target.datapoints[index][0];
+                            value = (value == null) ? 0 : value;
+
+                            points.push([
+                                target.datapoints[index][1] * 1000,
+                                value
+                            ]);
+                        }
+
+                        // Add data into series
+                        series.push({
+                            label: target.target,
+                            data: points
+                        });
+                    }
+
+                    // Result
+                    var result = {
+                        series: series,
+                        options: {}
+                    }
+
+                    // Check if any algorithms are set
+                    var algorithm = false;
+                    if (algorithm = Graphite.algorithms.get(self.settings.algorithm)) {
+                        result = algorithm.process(result);
+                    }
+
+                    // Redraw
+                    self.drawGraph(result.series, result.options);
+                    schedule.schedule();
+                }
+            );
+        }
+        else
+        {
+            schedule.schedule();
+        }
     },
-    postApply: function () {
+    drawGraph: function (series, override) {
+        var self = this;
 
-        var container = $("#widget-" + this.id + " .box");
-        var palette = new Rickshaw.Color.Palette( { scheme: 'spectrum2000' } );
+        // Calculate legend height
+        var legends = series.length;
+        var height = 17 * legends;
+        $("#widget-" + self.id + " .graphite-legend").height(height);
+        $("#widget-" + self.id + " .graphite-cont").height(290 - height);
 
-        this.graph = new Rickshaw.Graph({
-            element: document.getElementById("graph-" + this.id),
-            width: container.width() - 60,
-            height: 230,
-            renderer: 'area',
-            stroke: true,
-            padding: { top: 0.2 },
-            strokeWidth: 4,
-            series: [
-                { data: this.data[0], name: 'Moscow', color: palette.color() },
-                { data: this.data[1], name: 'Shanghai', color: palette.color() }
-            ]
-        });
+        var settings = {
+            series: {
+                lines: {
+                    fill: true,
+                    fillColor: { colors: [  { opacity: 0.1 }, {opacity: 0.1 } ] },
+                    lineWidth: 1
+                }
+            },
+            legend: {
+                container: "#widget-" + self.id + " .graphite-legend"
+            },
+            xaxis: {
+                mode: "time",
+                timeformat: "%m/%d"
+            },
+            yaxis: {
+                autoscaleMargin: null
+            },
+            grid: {
+                borderWidth: 1,
+                borderColor: '#dedede',
+                hoverable: true
+            },
+            colors: ["#FFAD33", "#B870B8", "#66CCFF", "#85E085", "#DB4D4D"]
+        };
 
-        var xAxis = new Rickshaw.Graph.Axis.Time({
-            graph: this.graph
-        });
+        // Extend the settings
+        settings = $.extend(true, settings, override);
 
-        var yAxis = new Rickshaw.Graph.Axis.Y({
-            graph: this.graph,
-            orientation: 'left',
-            tickFormat: Rickshaw.Fixtures.Number.formatKMBT,
-            element: document.getElementById('y-axis-' + this.id)
-        });
+        // Graph configuration
+        $.plot(
+            "#widget-" + self.id + " .graphite-cont",
+            series,
+            settings
+        );
 
+        // Tooltip display function
+        var tooltip = function (x, y, contents) {
+            $('<div class="graphite-tooltip">' + contents + '</div>')
+                .css({
+                    position: 'absolute',
+                    display: 'none',
+                    top: y + 5,
+                    left: x + 5,
+                    opacity: 0.8
+                })
+                .appendTo("body")
+                .show();
+        };
 
-        this.graph.render();
-        //xAxis.render();
-        //yAxis.render();
+        // Bind the tooltip code
+        $("#widget-" + self.id + " .graphite-cont").on(
+            "plothover",
+            function (event, pos, item) {
+                $("#x").text(pos.x.toFixed(2));
+                $("#y").text(pos.y.toFixed(2));
+
+                $(".graphite-tooltip").remove();
+
+                if (item !== null) {
+                    var x = item.datapoint[0], y = item.datapoint[1].toFixed(2);
+                    var date = new Date(x);
+                    date = date.getUTCFullYear() + "/" + (date.getUTCMonth() + 1) + "/" + date.getUTCDate();
+
+                    // Show tooltip
+                    tooltip(
+                        item.pageX,
+                        item.pageY,
+                        item.series.label + "<br/> " + date + " = " + y
+                    );
+                }
+            }
+        );
+    },
+    apply: function () {
+        this._super();
     }
 });
+
+Graphite.algorithms = {
+    all: [],
+    get: function (id) {
+        for (var key in this.all) {
+            var entry = this.all[key];
+            if (entry.id == id) {
+                return new entry();
+            }
+        }
+        return false;
+    },
+    getAsNameValue: function () {
+        var result = [];
+        for (var key in this.all) {
+            result.push({
+                name: this.all[key].label,
+                value: this.all[key].id
+            });
+        }
+        return result;
+    },
+    add: function (algorithm) {
+        this.all.push(algorithm);
+    }
+}
+
+Graphite.config = {
+    type: 'graphite-graph',
+    description: 'This widget loads up an existing graphite graph for rendering.',
+    width: 6,
+    height: 2
+}
+
+// Add some custom styles
+Application.styles.add(".box .render .graphite-cont { margin-left: 10px; margin-right: 10px; height: 290px; }");
+Application.styles.add(".graphite-tooltip { background-color: #333333; border: 1px solid #11111; color: #efefef; font-family: Arial; font-size: 13px; font-weight: normal; padding: 10px; text-align: center; }");
+Application.styles.add(".box .render .graphite-legend { height: 0px; margin-top: 10px; margin-left: 10px; margin-right: 10px; }");
+
+//Application.registerWidgetType(Graphite);
+
+
+
+
+
+
+
+
+
+
+
+
+
+var GraphiteAlgorithm = Class.extend({
+    process: function (series) {
+        return series;
+    }
+});
+
+GraphiteAlgorithm.label = "Algorithm";
+GraphiteAlgorithm.id = "algorithm";
+
+
+
+
+// Set up a basic algorithm to stack the graph
+var Stack = GraphiteAlgorithm.extend({
+    process: function (series) {
+
+        // Override the settings
+        series.options = {
+            series: {
+                stack: true,
+                lines: {
+                    fill: true,
+                    fillColor: { colors: [  { opacity: 0.6 }, {opacity: 0.6 } ] },
+                    lineWidth: 0
+                }
+            }
+        }
+
+        return series;
+    }
+});
+
+Stack.label = "Stack Datasets";
+Stack.id = "stack-datasets";
+
+Graphite.algorithms.add(Stack);
+
+
+
+

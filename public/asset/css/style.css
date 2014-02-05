@@ -10,6 +10,15 @@ body
     position: relative;
 }
 
+body.noanimation *
+{
+    -webkit-transition: none !important;
+    -moz-transition: none !important;
+    -o-transition: none !important;
+    -ms-transition: none !important;
+    transition: none !important;
+}
+
 a
 {
     color: #f1f1f1 !important;
@@ -47,10 +56,101 @@ a:hover
     box-shadow:         1px 1px 3px #d4cdc8;
 }
 
+.navbar-default .dropdown .dropdown-toggle
+{
+    display: inline-block;
+    padding: 15px;
+}
+
+.navbar-default .dropdown.open .dropdown-toggle
+{
+    background-color: #292725;
+}
+
+.navbar-default .dropdown .dropdown-menu
+{
+    padding: 0px;
+    top: auto;
+    background-color: #403b38;
+
+    border-radius: 0px;
+    -webkit-border-radius: 0px;
+    -moz-border-radius: 0px;
+
+    margin-top: -1px;
+    border-top: 0px;
+
+    -moz-box-shadow:    none;
+    -webkit-box-shadow: none;
+    box-shadow:         none;
+}
+
+.navbar-default .dropdown .dropdown-menu li
+{
+    padding-left: 10px;
+    padding-top: 5px;
+    padding-bottom: 5px;
+
+    font-size: 20px;
+    font-weight: normal;
+    margin: 5px;
+    width: 280px;
+}
+
+.navbar-default .dropdown .dropdown-menu li.grey,
+.navbar-default .dropdown .dropdown-menu li.grey span
+{
+    color: #999999 !important;
+}
+
+.navbar-default .dropdown .dropdown-menu li:hover
+{
+    background-color: #292725;
+}
+
+.navbar-default .dropdown .dropdown-menu li div
+{
+    display: inline-block;
+    line-height: 30px;
+}
+
+.navbar-default .dropdown .dropdown-menu li a,
+.navbar-default .dropdown .dropdown-menu li span
+{
+    padding: 0px;
+    color: #cccccc !important;
+    margin-right: 15px;
+    clear: none !important;
+}
+
+
+.navbar-default .dropdown .dropdown-menu li span
+{
+    margin-top: 4px;
+}
+
+.navbar-default .dropdown .dropdown-menu li a:hover
+{
+    background-color: transparent !important;
+    color: #FFAD5C !important;
+}
+
 .navbar-default .navbar-brand
 {
     font-size: 24px;
+    padding: 0px;
     padding-left: 0px;
+    color: #f1f1f1 !important;
+    cursor: pointer;
+}
+
+.navbar-default .navbar-brand .caret
+{
+    margin-left: 20px;
+    color: #5C5652;
+    border-top: 6px solid;
+    border-right: 6px solid transparent;
+    border-left: 6px solid transparent;
 }
 
 .navbar-default .navbar-right
@@ -64,19 +164,44 @@ a:hover
     width: auto;
     display: inline-block;
     padding-right: 15px;
+    line-height: 18px;
+}
+
+.navbar-default .navbar-right a:hover,
+.navbar-default .navbar-right a.down
+{
+    background-color: #000000 !important;
+    color: #FFAD5C !important;
+}
+
+.nav-tabs li a
+{
+    background-color: #999999;
+    color: #EFEFEF !important;
+}
+
+.nav-tabs li a:hover
+{
+    background-color: #333333;
+}
+
+.nav-tabs li.active a,
+.nav-tabs li.active a:hover
+{
+    background-color: #333333;
+    color: #FFFFFF !important;
+}
+
+.tab-content
+{
+    padding: 10px;
+    margin-top: 10px;
 }
 
 .container
 {
     width: 100%;
     padding: 25px;
-}
-
-div.gridster
-{
-    list-style: none;
-    width: auto;
-    padding: 0px;
 }
 
 .box
@@ -133,9 +258,16 @@ div.gridster
     padding: 0px;
 }
 
+.load
+{
+    background-image: url('../img/ajax-loader.gif');
+    background-position: center 10px;
+    background-repeat: no-repeat;
+}
+
 .block
 {
-    position: absolute;
+    position: fixed;
     top: 0px;
     left: 0px;
     width: 100%;
@@ -151,10 +283,10 @@ div.gridster
 
 .settings
 {
-    width: 500px;
+    width: 600px;
     height: auto;
     left: 50%;
-    margin-left: -250px;
+    margin-left: -300px;
     top: 100px;
     position: absolute;
 
@@ -191,6 +323,11 @@ div.gridster
     color: #ffffff;
 }
 
+.settings .widget:not(:first-child)
+{
+    margin-top: 10px;
+}
+
 .settings .widget h4,
 .settings .widget p
 {
@@ -201,4 +338,9 @@ div.gridster
 {
     margin: 20px;
     font-size: 30px;
+}
+
+.grid
+{
+    position: relative;
 }

@@ -46,3 +46,8 @@ promise
             process.exit(1);
         }
     });
+
+// Handle any dodgy errors
+process.on('uncaughtException', function(err) {
+    console.log(err);
+});

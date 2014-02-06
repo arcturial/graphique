@@ -170,8 +170,8 @@ a:hover
 .navbar-default .navbar-right a:hover,
 .navbar-default .navbar-right a.down
 {
-    background-color: #000000 !important;
     color: #FFAD5C !important;
+    border-bottom: 4px solid #FFAD5C;
 }
 
 .nav-tabs li a

@@ -39,22 +39,24 @@ var Jenkins = Widget.extend({
         jenkinsJob.onInit(function () {
             // Get the job list from jenkins. Private method.
             var getJobs = function (value) {
-                self.remoteRequest(value + self.path, function (data) {
-                    jenkinsJob.options([]);
+                if (value != '') {
+                    Remote.request(value + self.path, function (data) {
+                        jenkinsJob.options([]);
 
-                    var data = JSON.parse(data);
-                    var data = data.jobs;
+                        var data = JSON.parse(data);
+                        var data = data.jobs;
 
-                    for (var key in data) {
-                        jenkinsJob.options.push({ name: data[key].name, value: data[key].name });
-                    }
-                });
+                        for (var key in data) {
+                            jenkinsJob.options.push({ name: data[key].name, value: data[key].name });
+                        }
+                    });
+                }
             }
 
             // Register a subscriber that pulls new jobs when the Jenkins URL
             // changes
             jenkinsUrl.data.subscribe(function (value) {
-                if (value != '') { getJobs(value); }
+                getJobs(value);
             });
 
             // Load the list on first init based on the buffer
@@ -88,6 +90,7 @@ var Jenkins = Widget.extend({
         if (!jenkinsUrl || !jenkinsJob)
         {
             done();
+            return true;
         }
 
         // Request new information

@@ -5,6 +5,7 @@ var Schedule = Class.extend({
         self.scheduled = false;
     },
     abolish: function () {
+        clearTimeout(this.scheduled);
         this.scheduled = false;
         $(Schedule).trigger('abolish');
     },
@@ -24,12 +25,13 @@ var Schedule = Class.extend({
 
         // Get the latest interval or run it now.
         //var time = !now ? self.context.struct.getField('interval').value() : 0;
+        var func = function() {
+            self.abolish();
+            //self.callback.call(self);
+        };
 
         // Schedule a new request
-        self.scheduled = setTimeout(function() {
-            self.abolish();
-            self.callback.call(self);
-        }, time);
+        self.scheduled = setTimeout(func, time);
 
         $(Schedule).trigger('schedule', [time]);
     }

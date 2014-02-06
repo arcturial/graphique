@@ -1,3 +1,6 @@
+
+
+
 var Remote = {
     forwardUrl: "http://" + window.location.host + "/forward",
     active: [],
@@ -30,18 +33,18 @@ var Remote = {
 
 function Request(callback, context) {
     var self = this;
+    self.done = false;
 
-    self.run = function () {
+    self.run = function (done) {
+        self.done = done;
         callback.call(context, self);
     }
 
     self.release = function () {
-        $(self).trigger('release');
-        return self;
-    }
+        if (typeof self.done !== 'undefined') {
+            self.done.call(self);
+        }
 
-    self.ready = function (callback) {
-        $(self).on('release', callback);
         return self;
     }
 }
@@ -63,10 +66,12 @@ function Worker() {
     self.process = function (request) {
         self.busy = true;
 
-        request.ready(function () {
+        var markAsDone = function () {
             self.busy = false;
             self.release();
-        }).run();
+        };
+
+        request.run(markAsDone);
     }
 }
 

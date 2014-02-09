@@ -1,51 +1,30 @@
 // Require dependencies
 var app     = require('./../lib/app');
 var fs      = require('fs');
-var path    = require('path');
-var promise = require('./../lib/promise/promise');
 
 // Override error handling
-//require('./../lib/debug');
+require('./../lib/debug');
 
-// Setup dependencies
-var config = {}
-
-// Handle the parsing of the configuration file.
-var loadConfig = function (pledge) {
-
-    pledge.success();
-    /*
-    fs.readFile(
-        path.join(__dirname, './../config.json'),
-        'utf8',
-        function(err, data) {
-
-            if (!err) {
-                config = JSON.parse(data);
-                pledge.success();
-            } else {
-                pledge.fail('config file not found');
-            }
-        }
-    );
-    */
-}
+// Set asset config
+var assets = [
+    __dirname + './../lib/render/third/jquery.js',
+    __dirname + './../lib/render/third/bootstrap.js',
+    __dirname + './../lib/render/third/gridly.js',
+    __dirname + './../lib/render/third/jquery.flot.js',
+    __dirname + './../lib/render/third/jquery.flot.stack.js',
+    __dirname + './../lib/render/third/jquery.flot.time.js',
+    __dirname + './../lib/render/third/knockout.js',
+    __dirname + './../lib/render/inheritance.js',
+    __dirname + './../lib/render/queue.js',
+    __dirname + './../lib/render/settings.js',
+    __dirname + './../lib/render/field.js',
+    __dirname + './../lib/render/core.js',
+    __dirname + './../lib/render/dashboard.js',
+    __dirname + './../lib/render/widget.js'
+];
 
 // Boot up the application
-promise
-    .create()
-    .pledge(loadConfig)
-    .then(function (err, state) {
-
-        if (state) {
-            // Start the application
-            app.init(config);
-        } else {
-
-            console.error('boot failure. (' + err + ')');
-            process.exit(1);
-        }
-    });
+app.init(assets);
 
 // Handle any dodgy errors
 process.on('uncaughtException', function(err) {

@@ -12,10 +12,8 @@ var Jenkins = Widget.extend({
         // Add custom class
         self.classes.push('jenkins');
 
-        /**
-         * Update the class of the widget. More visible
-         * status changes.
-         */
+        //Update the class of the widget. More visible
+        // status changes.
         self.data.status.subscribe(function (value) {
             self.classes.push(value);
         });
@@ -29,13 +27,16 @@ var Jenkins = Widget.extend({
 
         // Configure Jenkins custom fields && Tab
         var jenkinsTab = new Tab('Jenkins');
+
         // Push the URL into Jenkins settings
         var jenkinsUrl = new TextField('Jenkins URL', '');
         jenkinsTab.fields.push(jenkinsUrl);
 
         // Push the job listing into Jenkins settings
         var jenkinsJob = new RadioBox('Jenkins Job', false, []);
+        jenkinsTab.fields.push(jenkinsJob);
 
+        // Add an "init" hook to the field
         jenkinsJob.onInit(function () {
             // Get the job list from jenkins. Private method.
             var getJobs = function (value) {
@@ -43,11 +44,15 @@ var Jenkins = Widget.extend({
                     Remote.request(value + self.path, function (data) {
                         jenkinsJob.options([]);
 
-                        var data = JSON.parse(data);
-                        var data = data.jobs;
+                        try {
+                            var data = JSON.parse(data);
+                            var data = data.jobs;
 
-                        for (var key in data) {
-                            jenkinsJob.options.push({ name: data[key].name, value: data[key].name });
+                            for (var key in data) {
+                                jenkinsJob.options.push({ name: data[key].name, value: data[key].name });
+                            }
+                        } catch (e) {
+                            self.error(e);
                         }
                     });
                 }
@@ -64,7 +69,6 @@ var Jenkins = Widget.extend({
             getJobs(jenkinsUrl.data());
         });
 
-        jenkinsTab.fields.push(jenkinsJob);
 
         // Add the fields
         self.struct.tabs.push(jenkinsTab);
@@ -95,24 +99,27 @@ var Jenkins = Widget.extend({
 
         // Request new information
         Remote.request(jenkinsUrl + self.path, function (data) {
-            data = JSON.parse(data);
 
-            for (var key in data.jobs) {
-                var job = data.jobs[key];
+            try {
+                data = JSON.parse(data);
 
-                if (job.name == jenkinsJob) {
-                    self.data.status(job.color);
+                for (var key in data.jobs) {
+                    if (data.jobs[key].name == jenkinsJob) {
+                        self.data.status(data.jobs[key].color);
 
-                    var temp = job.displayName.substr(0, 25);
-                    if (job.displayName.length > 25) {
-                        temp + " ...";
+                        var temp = data.jobs[key].displayName.substr(0, 25);
+                        if (data.jobs[key].displayName.length > 25) {
+                            temp + " ...";
+                        }
+
+                        self.data.title(temp);
+                        self.data.build(data.jobs[key].lastBuild.number);
                     }
-
-                    self.data.title(temp);
-                    self.data.build(job.lastBuild.number);
                 }
+            } catch (e) {
+                self.error(e);
             }
-
+        }, function () {
             done();
         });
     }

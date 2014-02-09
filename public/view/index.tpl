@@ -7,21 +7,12 @@
         <link rel="stylesheet" href="/css/third/rickshaw.min.css" type="text/css" />
         <link rel="stylesheet" href="/css/style.css" type="text/css" />
 
-        <script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js" ></script>
-        <script src="//netdna.bootstrapcdn.com/bootstrap/3.0.3/js/bootstrap.min.js"></script>
-        <script src="/js/third/gridly.js"></script>
-        <script src="/js/third/knockout.js"></script>
-        <script src="/js/third/jquery.flot.js"></script>
-        <script src="/js/third/jquery.flot.time.js"></script>
-        <script src="/js/third/jquery.flot.curved.js"></script>
-        <script src="/js/third/jquery.flot.stack.js"></script>
-        <script src="/js/third/inheritance.js"></script>
-        <script src="/js/queue.js"></script>
+        <script src="/socket.io/socket.io.js"></script>
+        <script src="/graphique/core.js"></script>
         <script src="/js/script.js"></script>
-        <script src="/js/widget/widget.js"></script>
         <script src="/js/widget/graphite.js"></script>
         <script src="/js/widget/jenkins.js"></script>
-        <script src="/socket.io/socket.io.js"></script>
+        <script src="/js/widget/labels.js"></script>
     </head>
 
     <body data-bind="css: { 'noanimation': !animating() }">
@@ -35,13 +26,13 @@
 
                     <div class="dropdown navbar-brand">
                         <div class="dropdown-toggle" data-toggle="dropdown">
-                            <span href="#" data-bind="text: name"></span>
+                            <span href="#" data-bind="text: struct.getField('title').value"></span>
                             <b class="caret"></b>
                         </div>
                         <ul class="dropdown-menu" role="menu">
                             <!-- ko foreach: $root.dashboards -->
                                 <li data-bind="click: $root.setActiveDashboard.bind($root, $index())">
-                                    <div data-bind="text: name"></div>
+                                    <div data-bind="text: struct.getField('title').value"></div>
                                     <a class="glyphicon glyphicon-cog pull-right" data-bind="click: showSettings"></a>
                                 </li>
                             <!-- /ko -->
@@ -85,7 +76,8 @@
 
         <script type="text/html" id="widget-add">
             <div class='header'>
-                <h3>Add Widget</h3>
+                <h3 style='display: inline-block;'>Add Widget</h3>
+                <button type="button" class="close" aria-hidden="true" data-bind="click: removeSettings">&times;</button>
             </div>
             <div data-bind="foreach: type">
                 <div class="row widget">
@@ -145,6 +137,9 @@
                 </div>
             </div>
         </script>
+
+
+        <div class='graphique-log'></div>
 
     </body>
 </html>

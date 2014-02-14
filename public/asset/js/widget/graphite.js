@@ -121,6 +121,7 @@ var Graphite = Widget.extend({
 
         // Graph color setup
         self.colors = shuffle(["#67001f", "#b2182b", "#d6604d", "#f4a582", "#d1e5f0", "#92c5de", "#4393c3", "#2166ac", "#053061"]);
+        self.plot = null;
     },
     content: function () {
         return '<div class="graphite-cont"></div>'
@@ -229,8 +230,13 @@ var Graphite = Widget.extend({
         // Extend the settings
         settings = $.extend(true, settings, override);
 
+        // Destroy if already exists
+        if (self.plot != null) {
+            self.plot.destroy();
+        }
+
         // Graph configuration
-        $.plot(
+        self.plot = $.plot(
             "#widget-" + self.id + " .graphite-cont",
             series,
             settings
@@ -251,9 +257,11 @@ var Graphite = Widget.extend({
         };
 
         // Bind the tooltip code
+        $("#widget-" + self.id + " .graphite-cont").off('plothover');
         $("#widget-" + self.id + " .graphite-cont").on(
             "plothover",
             function (event, pos, item) {
+                    console.log('asd');
                 $("#x").text(pos.x.toFixed(2));
                 $("#y").text(pos.y.toFixed(2));
 

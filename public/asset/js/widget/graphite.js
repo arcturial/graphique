@@ -120,7 +120,7 @@ var Graphite = Widget.extend({
         self.struct.tabs.push(graphiteTab);
 
         // Graph color setup
-        self.colors = shuffle(["#67001f", "#b2182b", "#d6604d", "#f4a582", "#d1e5f0", "#92c5de", "#4393c3", "#2166ac", "#053061"]);
+        self.colors = shuffle(["#a6cee3", "#1f78b4", "#b2df8a", "#33a02c", "#fb9a99", "#e31a1c", "#fdbf6f", "#ff7f00", "#cab2d6", "#6a3d9a"]);
         self.plot = null;
     },
     content: function () {
@@ -210,6 +210,7 @@ var Graphite = Widget.extend({
                 }
             },
             legend: {
+                noColumns: 2,
                 container: "#widget-" + self.id + " .graphite-legend"
             },
             xaxis: {
@@ -221,8 +222,9 @@ var Graphite = Widget.extend({
             },
             grid: {
                 borderWidth: 1,
-                borderColor: '#dedede',
-                hoverable: true
+                borderColor: '#222222',
+                hoverable: true,
+                color: "#999999"
             },
             colors: self.colors
         };
@@ -261,7 +263,7 @@ var Graphite = Widget.extend({
         $("#widget-" + self.id + " .graphite-cont").on(
             "plothover",
             function (event, pos, item) {
-                    console.log('asd');
+
                 $("#x").text(pos.x.toFixed(2));
                 $("#y").text(pos.y.toFixed(2));
 
@@ -324,6 +326,8 @@ Graphite.config = {
 Application.styles.add(".box .render .graphite-cont { margin-left: 10px; margin-right: 10px; height: 290px; }");
 Application.styles.add(".graphite-tooltip { background-color: #333333; border: 1px solid #11111; color: #efefef; font-family: Arial; font-size: 13px; font-weight: normal; padding: 10px; text-align: center; }");
 Application.styles.add(".box .render .graphite-legend { height: 0px; margin-top: 10px; margin-left: 10px; margin-right: 10px; }");
+Application.styles.add(".graphite-legend .legendColorBox { padding-right: 10px; padding-bottom: 2px; }");
+Application.styles.add(".graphite-legend .legendLabel { padding-right: 20px; padding-bottom: 2px; }");
 
 Application.registerWidgetType(Graphite);
 

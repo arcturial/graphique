@@ -77,7 +77,7 @@ var Jenkins = Widget.extend({
         var body = '<h3 data-bind="text: data.title"></h3>';
         body += '<div class="row">';
         body += '<div class="col-md-8">';
-        body += '<p>Build Number : <span data-bind="text: data.build"></span></p>';
+        body += '<p style="color: #666666;">Build Number : <span data-bind="text: data.build"></span></p>';
         body += '</div>';
         body += '<div class="col-md-4 text-center">';
         body += '<span class="glyphicon status jenkins" data-bind="css: data.status"></span>';
@@ -108,8 +108,9 @@ var Jenkins = Widget.extend({
                         self.data.status(data.jobs[key].color);
 
                         var temp = data.jobs[key].displayName.substr(0, 25);
+
                         if (data.jobs[key].displayName.length > 25) {
-                            temp + " ...";
+                            temp += " ...";
                         }
 
                         self.data.title(temp);
@@ -133,14 +134,12 @@ Jenkins.config = {
 }
 
 
-Application.styles.add('.jenkins h3 { margin-top: 0px; height: 46px; }');
+Application.styles.add('.jenkins h3 { margin-top: 0px; font-size: 30px; line-height: 40px; height: 80px; }');
 Application.styles.add('.jenkins.status { font-size: 46px; }');
 Application.styles.add('.jenkins.status.blue { color: #7cac40; } .status.blue:before {content:"\\e013"}');
 Application.styles.add('.jenkins.status.blue_anime { color: #5A93CC; } .status.blue_anime:before {content:"\\e023"}');
+Application.styles.add('.jenkins.status { margin-top: -40px; margin-right: -10px; }');
 Application.styles.add('.jenkins.status.grey:before {content:"\\2a"}');
 Application.styles.add('.jenkins.status.red { color: #ad3e37; } .status.red:before {content:"\\e014"}');
-Application.styles.add('.box.jenkins.red { background-color: #f4e5e5; border-color: #b87b7b; color: #8A4A4A; }');
-Application.styles.add('.box.jenkins.blue { background-color: #edf6e5; border-color: #87aa67; color: #87aa67; }');
-Application.styles.add('.box.jenkins.blue_anime { background-color: #E8F3FA; border-color: #ACC9E6; color: #5A93CC; }');
 
 Application.registerWidgetType(Jenkins);

@@ -2,7 +2,7 @@ html, body
 {
     width: 100%;
     height: 100%;
-    background-color: #e9e4e1;
+    background-color: #111216;
 }
 
 body
@@ -70,13 +70,13 @@ a:hover
 
     margin-bottom: 0px;
 
-    background-color: #403b38;
+    background-color: #282828;
     border: none;
-    border-bottom: 1px solid #f1f0ee;
+    border-bottom: 1px solid #393939;
 
-    -moz-box-shadow:    1px 1px 3px #d4cdc8;
-    -webkit-box-shadow: 1px 1px 3px #d4cdc8;
-    box-shadow:         1px 1px 3px #d4cdc8;
+    -moz-box-shadow:    1px 1px 3px #000000;
+    -webkit-box-shadow: 1px 1px 3px #000000;
+    box-shadow:         1px 1px 3px #000000;
 }
 
 .navbar-default .dropdown .dropdown-toggle
@@ -87,14 +87,14 @@ a:hover
 
 .navbar-default .dropdown.open .dropdown-toggle
 {
-    background-color: #292725;
+    background-color: #282828;
 }
 
 .navbar-default .dropdown .dropdown-menu
 {
     padding: 0px;
     top: auto;
-    background-color: #403b38;
+    background-color: #282828;
 
     border-radius: 0px;
     -webkit-border-radius: 0px;
@@ -128,7 +128,7 @@ a:hover
 
 .navbar-default .dropdown .dropdown-menu li:hover
 {
-    background-color: #292725;
+    background-color: #333333;
 }
 
 .navbar-default .dropdown .dropdown-menu li div
@@ -155,7 +155,7 @@ a:hover
 .navbar-default .dropdown .dropdown-menu li a:hover
 {
     background-color: transparent !important;
-    color: #FFAD5C !important;
+    color: #5dbce3 !important;
 }
 
 .navbar-default .navbar-brand
@@ -201,26 +201,40 @@ a:hover
 .navbar-default .navbar-right a:hover,
 .navbar-default .navbar-right a.down
 {
-    color: #FFAD5C !important;
-    border-bottom: 3px solid #FFAD5C;
+    color: #5dbce3 !important;
+    border-bottom: 3px solid #5dbce3;
+}
+
+.nav-tabs
+{
+    border-bottom: 1px solid #333333;
 }
 
 .nav-tabs li a
 {
-    background-color: #999999;
+    background-color: #333333;
     color: #EFEFEF !important;
+    border: 1px solid #333333 !important;
 }
 
 .nav-tabs li a:hover
 {
-    background-color: #333333;
+    background-color: #222222;
 }
 
 .nav-tabs li.active a,
-.nav-tabs li.active a:hover
+.nav-tabs li.active a:hover,
+.nav-tabs li.active a:focus
 {
-    background-color: #333333;
+    background-color: #222222;
     color: #FFFFFF !important;
+}
+
+.form-control
+{
+    background-color: #222222 !important;
+    color: #dedede;
+    border: 1px solid #333333;
 }
 
 .tab-content
@@ -237,13 +251,13 @@ a:hover
 
 .box
 {
-    background-color: #f1f0ee;
-    border: 4px solid #d1cbc6;
+    background-color: #171717;
+    border: 4px solid #2a2a2a;
 
     height: 100%;
     padding: 12px;
 
-    color: #999999;
+    color: #cccccc;
 }
 
 .box .header
@@ -266,7 +280,7 @@ a:hover
 {
     margin: 0px;
     margin-bottom: 20px;
-    color: #403b38;
+    color: #cccccc;
 }
 
 .box .header .glyphicon-cog
@@ -277,6 +291,11 @@ a:hover
     font-size: 15px;
 
     color: #bdbab8 !important;
+}
+
+.box .header .glyphicon-cog:hover
+{
+    color: #5dbce3 !important;
 }
 
 .box .row
@@ -309,12 +328,17 @@ a:hover
     width: 100%;
     height: 100%;
 
-    background-color: #ffffff;
+    background-color: #111111;
     z-index: 999;
 
     -moz-opacity: 0.8;
     opacity: 0.8;
     filter: alpha(opacity=80);
+}
+
+button.close
+{
+    color: #999999;
 }
 
 .settings
@@ -353,10 +377,15 @@ a:hover
 
 .settings .widget
 {
-    background-color: #b3aea2;
-    border: 1px solid #979286;
+    background-color: #222222;
+    border: 1px solid #333333;
     padding: 15px;
     color: #ffffff;
+}
+
+.settings .widget a:hover
+{
+    color: #5dbce3 !important;
 }
 
 .settings .widget:not(:first-child)

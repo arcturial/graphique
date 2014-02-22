@@ -19,7 +19,24 @@
 
         <style type="text/css" data-bind="html: styles.all"></style>
 
-        <div data-bind="with: active">
+        <div data-bind="visible: !socket.io()" class="text-center">
+            <div class="jumbotron create-well">
+                Attempting to connect to the local server web socket...
+            </div>
+        </div>
+
+        <div data-bind="visible: !dashboard.active() && newDash" class="text-center">
+            <div class="jumbotron create-well">
+                Do you want to create a new dashboard?<br/><span data-bind="text: dashboard.struct.getField('id').value"></span>
+                <br/>
+                <button type="submit" data-bind="click: dashboard.save.bind(dashboard)" class="btn btn-primary">Create Now</button>
+            </div>
+        </div>
+
+
+
+
+        <div data-bind="with: dashboard.active">
 
             <nav class="navbar navbar-default" role="navigation">
                 <div class="navbar-header">
@@ -30,31 +47,34 @@
                             <b class="caret"></b>
                         </div>
                         <ul class="dropdown-menu" role="menu">
-                            <!-- ko foreach: $root.dashboards -->
-                                <li data-bind="click: $root.setActiveDashboard.bind($root, $index())">
+                            <!-- ko foreach: $root.dashboard.panels -->
+                                <li data-bind="click: $root.dashboard.setActivePanel.bind($root.dashboard, $index())">
                                     <div data-bind="text: struct.getField('title').value"></div>
                                     <a class="glyphicon glyphicon-cog pull-right" data-bind="click: showSettings"></a>
                                 </li>
                             <!-- /ko -->
-                            <li data-bind="click: $root.newDashboard.bind($root)" class="grey">
-                                <div>New Dashboard</div>
+                            <li data-bind="click: $root.dashboard.newPanel.bind($root.dashboard)" class="grey">
+                                <div>New Panel</div>
                                 <span class="glyphicon glyphicon-plus pull-right"></span>
                             </li>
                         </ul>
                     </div>
                 </div>
 
+                <div class='graphique-time'></div>
+
                 <ul class="nav navbar-nav navbar-right">
                     <li><a data-bind="click: addWidgetSettings" class='glyphicon glyphicon-plus' title="Add Widget"></a></li>
-                    <li><a data-bind="click: $root.save.bind($root)" class='glyphicon glyphicon-floppy-save' title="Save Changes"></a></li>
+                    <li><a data-bind="click: $root.dashboard.save.bind($root.dashboard)" class='glyphicon glyphicon-floppy-save' title="Save Changes"></a></li>
                     <li><a data-bind="css: { 'down': $root.rotating() }, click: $root.toggleRotate.bind($root)" class='glyphicon glyphicon-repeat' title="Rotate Dashboards"></a></li>
                     <li><a data-bind="css: { 'down': $root.animating() }, click: $root.toggleAnimation.bind($root)" class='glyphicon glyphicon-facetime-video' title="Animations"></a></li>
+                    <li><a data-bind="click: $root.dashboard.showSettings.bind($root.dashboard)" class='glyphicon glyphicon-cog' title="Configuration"></a></li>
                 </ul>
             </nav>
 
 
             <div class="container">
-                <div class="grid gridly" data-bind="foreach: { data: widgets, afterRender: $root.applyWidget }, updateGrid: widgets">
+                <div class="grid gridly" data-bind="foreach: { data: widgets, afterRender: $root.dashboard.applyWidget }, updateGrid: widgets">
                     <div class="brick" data-bind="attr: { 'data-id': id, 'data-col': $data.constructor.config.width, 'data-row': $data.constructor.config.height }, template: { name: 'widget-template', data: $data }"></div>
                 </div>
             </div>
@@ -86,7 +106,7 @@
                         <p data-bind="text: config.description"></p>
                     </div>
                     <div class="col-md-3 text-right">
-                        <a class="glyphicon glyphicon-plus" data-bind="click: function () { $root.active().addWidget(config.type); }"></a>
+                        <a class="glyphicon glyphicon-plus" data-bind="click: function () { $root.dashboard.active().addWidget(config.type); }"></a>
                     </div>
                 </div>
             </div>
@@ -109,10 +129,7 @@
                 <div class="tab-content" data-bind="foreach: struct.tabs">
                     <div data-bind="css: { 'tab-pane': true, 'active': $index() == 0 }, attr: { 'id': toDom(name) }">
                         <div data-bind="foreach: { data: fields, afterRender: $root.bindField }">
-                            <div class="form-group">
-                                <label data-bind="attr: { for: name }, text: name"></label>
-                                <div data-bind="html: render()"></div>
-                            </div>
+                            <div data-bind="html: renderFull()"></div>
                         </div>
                     </div>
                 </div>
@@ -137,9 +154,5 @@
                 </div>
             </div>
         </script>
-
-
-        <div class='graphique-log'></div>
-
     </body>
 </html>

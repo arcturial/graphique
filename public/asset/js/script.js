@@ -1,4 +1,3 @@
-
 /**
  * Prepare the application.
  */
@@ -39,7 +38,7 @@ $(document).ready(function() {
 
                 // Notify the widget resize
                 var id = $(this).data().id;
-                $(Application.active().get(id)).trigger('size');
+                $(Application.dashboard.active().get(id)).trigger('size');
             });
 
             // Refresh a grid
@@ -47,43 +46,14 @@ $(document).ready(function() {
         }
     };
 
-    // Deactive all widgets that will be replaced
-    Application.active.subscribe(function (value) {
-        if (value) {
-            for (var key in value.widgets()) {
-                value.widgets()[key].schedule.active = false;
-            }
-
-            // Persist the new widget order
-            Application.reorder();
-        }
-    }, null, 'beforeChange');
-
-    // Activate widgets
-    Application.active.subscribe(function (value) {
-        for (var key in value.widgets()) {
-            value.widgets()[key].schedule.active = true;
-        }
-    });
-
-    // Check for dashboard rotation
-    var rotating = false;
-    Application.rotating.subscribe(function (value) {
-        if (!value) {
-            clearInterval(rotating);
-            rotating = false;
-            return true;
-        }
-
-        rotating = setInterval(function () {
-            Application.nextDashboard();
-        }, 30000);
-    });
-
     // Apply KO bindings
     ko.applyBindings(Application);
 
     // Set up a socket to load from the data store
     var socket = io.connect('http://' + window.location.host);
-    Application.bind(socket);
+
+    // Set the active socket IO connection and bind
+    // it to the dashboard
+    Socket.io(socket);
+    Application.dashboard.bind();
 });
